@@ -1,5 +1,6 @@
 package com.minh;
 
+import org.apache.pdfbox.multipdf.LayerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -7,6 +8,7 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
+import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 
 import java.awt.*;
 import java.io.File;
@@ -40,7 +42,7 @@ public class Main {
                 String dir = "liberation-sans/LiberationSans-Bold.ttf";
                 PDType0Font font = PDType0Font.load(doc, new File(dir));
 
-                PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, false);
+                PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false, true);
 
                 contentStream.setNonStrokingColor(Color.RED);
 
@@ -48,21 +50,18 @@ public class Main {
                 contentStream.beginText();
 
                 //Setting the font to the Content stream
-                contentStream.setFont(font, 16);
+                contentStream.setFont(font, 36);
 
                 //Setting the position for the line
-//                contentStream.newLineAtOffset(0, 0);
-//                contentStream.line
-                //Adding text in the form of string
-//                contentStream.drawString(data.getName());
-                contentStream.addComment("abc");
+                contentStream.newLineAtOffset(270, 210);
 
-                contentStream.setLeading(10);
+                //Adding text in the form of string
                 contentStream.showText(data.getName());
 
+//                contentStream.newLine();
 //                contentStream.setFont(font, 36);
 //                contentStream.setNonStrokingColor(Color.BLUE);
-//                contentStream.newLineAtOffset(100, 100);
+//                contentStream.newLineAtOffset(0, 0);
 //                contentStream.showText(data.getDistance());
 
                 //Ending the content stream
