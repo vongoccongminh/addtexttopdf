@@ -56,7 +56,8 @@ public class Main {
 
         pdFieldToDataField.forEach((pdField, textOption) -> {
             try {
-                addText(pdField, doc, doc.getPage(0), textOption.getFieldName(), font, textOption.getText(), textOption.getTextColor());
+                acroForm.flatten();
+                addText(pdField, doc, doc.getPage(0), textOption.getFieldName(), font, textOption.getText(), textOption.getTextColor(), textOption.getTextAlign());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -66,13 +67,11 @@ public class Main {
         doc.close();
     }
 
-    static void addText(PDField field, PDDocument doc, PDPage page, String fieldName, PDType0Font font, String text, Color textColor) throws IOException {
+    static void addText(PDField field, PDDocument doc, PDPage page, String fieldName, PDType0Font font, String text, Color textColor, String textAlign) throws IOException {
         if (!field.getFullyQualifiedName().equals(fieldName)) {
             return;
         }
         PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false, true);
-
-        PDRectangle rectangle = field.getWidgets().get(0).getRectangle();
 
         field.setValue(null);
         field.setReadOnly(true);
@@ -84,8 +83,19 @@ public class Main {
         contentStream.setFont(font, fontSize);
         // Get text name width
         float textNameWidth = font.getStringWidth(text) / 1000 * fontSize;
+
+        PDRectangle rectangle = field.getWidgets().get(0).getRectangle();
+        float tx = (rectangle.getLowerLeftX() + rectangle.getUpperRightX()) / 2 - textNameWidth / 2;
+        float ty = rectangle.getLowerLeftY();
+        if (textAlign.equals("left")) {
+            tx = rectangle.getLowerLeftX();
+            ty = rectangle.getLowerLeftY();
+        } else if (textAlign.equals("right")){
+            tx = rectangle.getUpperRightX() - textNameWidth;
+            ty = rectangle.getLowerLeftY();
+        }
         // Setting the position for the line
-        contentStream.newLineAtOffset((rectangle.getLowerLeftX() + rectangle.getUpperRightX()) / 2 - textNameWidth / 2, rectangle.getLowerLeftY());
+        contentStream.newLineAtOffset(tx, ty);
         // Adding text in the form of string
         contentStream.showText(text);
         // Ending the content stream
@@ -99,11 +109,11 @@ public class Main {
         Color distanceColor = Color.BLACK;
 
         TextOption user1FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "center");
-        TextOption user1Distance = new TextOption("distance", "42km", distanceColor, "left");
-        TextOption user2FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "center");
-        TextOption user2Distance = new TextOption("distance", "100km", distanceColor, "left");
-        TextOption user3FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "left");
-        TextOption user3Distance = new TextOption("distance", "42km", distanceColor, "left");
+        TextOption user1Distance = new TextOption("distance", "42km", distanceColor, "center");
+        TextOption user2FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "left");
+        TextOption user2Distance = new TextOption("distance", "100km", distanceColor, "center");
+        TextOption user3FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "right");
+        TextOption user3Distance = new TextOption("distance", "45km", distanceColor, "center");
 
         final FileData user1FileData = new FileData(Arrays.asList(user1FullName, user1Distance));
         final FileData user2FileData = new FileData(Arrays.asList(user2FullName, user2Distance));
