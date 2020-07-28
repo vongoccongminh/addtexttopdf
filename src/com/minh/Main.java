@@ -26,14 +26,14 @@ public class Main {
 
         List<Data> dataList = new ArrayList<>();
 
-        dataList.add(new Data("Nguyễn Văn A", "25km"));
-        dataList.add(new Data("TRƯƠNG TRẦN NGÔ", "30km"));
-        dataList.add(new Data("Usain Bolt", "100m"));
+        dataList.add(new Data("Lê Bảo Toàn", "100km"));
+        dataList.add(new Data("Lê Bảo Toàn", "42km"));
+//        dataList.add(new Data("Usain Bolt", "100m"));
 
         dataList.forEach(data -> {
             try {
                 //Loading an existing document
-                PDDocument doc = PDDocument.load(new File("OoPdfFormExample.pdf"));
+                PDDocument doc = PDDocument.load(new File("e-certificate_RMS.pdf"));
 
                 //Creating a PDF Document
                 PDPage page = doc.getPage(0);
@@ -46,8 +46,8 @@ public class Main {
                 List<PDField> fields = acroForm.getFields();
 
                 for (PDField field : fields) {
-                    insert(field, doc, page, "Given Name Text Box", font, data.getName());
-                    insert(field, doc, page, "Family Name Text Box", font, data.getDistance());
+                    insert(field, doc, page, "fullName",  font, data.getName());
+                    insert(field, doc, page, "distance",  font, data.getDistance());
                 }
 
                 //Saving the document
@@ -75,14 +75,21 @@ public class Main {
             contentStream.setNonStrokingColor(Color.RED);
             //Setting the font to the Content stream
             contentStream.setFont(font, fontSizeName);
+
+            //Get text name width
+            float textNameWidth = font.getStringWidth(data) / 1000 * fontSizeName;
+
             //Setting the position for the line
-            contentStream.newLineAtOffset(rectangle.getLowerLeftX(), rectangle.getLowerLeftY());
+            contentStream.newLineAtOffset((rectangle.getLowerLeftX() + rectangle.getUpperRightX())/2 - textNameWidth / 2, rectangle.getLowerLeftY());
             //Adding text in the form of string
             contentStream.showText(data);
             //Ending the content stream
             contentStream.endText();
             //Closing the content stream
             contentStream.close();
+
+            field.setValue("");
+            field.setReadOnly(true);
         }
     }
 }
