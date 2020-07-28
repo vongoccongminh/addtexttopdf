@@ -56,12 +56,12 @@ public class Main {
 
         pdFieldToDataField.forEach((pdField, textOption) -> {
             try {
-                acroForm.flatten();
                 addText(pdField, doc, doc.getPage(0), textOption.getFieldName(), font, textOption.getText(), textOption.getTextColor(), textOption.getTextAlign());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+        acroForm.flatten();
         doc.save(new File(outputPath.toAbsolutePath() + "/" + String.join("_", fileNamePrefix, fileNameSuffix) + ".pdf"));
         // Closing the document
         doc.close();
