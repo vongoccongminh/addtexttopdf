@@ -33,30 +33,30 @@ public class Main {
         final Path outputPath = Files.createDirectories(Paths.get(outputDir));
         dataset.forEach(data -> {
             try {
-                generatePDFile(templateFile, data.getFieldData(), "e-certificate_RMS", outputPath);
+                generatePDFile(templateFile, data.getTextOptions(), "e-certificate_RMS", outputPath);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
     }
 
-    private static void generatePDFile(File templateFile, List<FieldData> dataFieldData, String fileNamePrefix, Path outputPath) throws IOException {
+    private static void generatePDFile(File templateFile, List<TextOption> dataFieldData, String fileNamePrefix, Path outputPath) throws IOException {
         PDDocument doc = PDDocument.load(templateFile);
 
         PDDocumentCatalog documentCatalog = doc.getDocumentCatalog();
         PDAcroForm acroForm = documentCatalog.getAcroForm();
         List<PDField> pdfFields = acroForm.getFields();
         final Map<String, PDField> fieldNameToPDField = pdfFields.stream().collect(Collectors.toMap(PDField::getFullyQualifiedName, f -> f));
-        final Map<PDField, FieldData> pdFieldToDataField = dataFieldData.stream().collect(Collectors.toMap(f -> fieldNameToPDField.get(f.getName()), f -> f));
+        final Map<PDField, TextOption> pdFieldToDataField = dataFieldData.stream().collect(Collectors.toMap(f -> fieldNameToPDField.get(f.getFieldName()), f -> f));
 
-        final String fileNameSuffix = dataFieldData.stream().map(FieldData::getText).collect(Collectors.joining("_"));
+        final String fileNameSuffix = dataFieldData.stream().map(TextOption::getText).collect(Collectors.joining("_"));
 
         String dir = "fonts/arial.ttf";
         PDType0Font font = PDType0Font.load(doc, new File(dir));
 
-        pdFieldToDataField.forEach((pdField, fieldData) -> {
+        pdFieldToDataField.forEach((pdField, textOption) -> {
             try {
-                addText(pdField, doc, doc.getPage(0), fieldData.getName(), font, fieldData.getText(), fieldData.getTextColor());
+                addText(pdField, doc, doc.getPage(0), textOption.getFieldName(), font, textOption.getText(), textOption.getTextColor());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -67,39 +67,48 @@ public class Main {
     }
 
     static void addText(PDField field, PDDocument doc, PDPage page, String fieldName, PDType0Font font, String text, Color textColor) throws IOException {
-        if (field.getPartialName().equals(fieldName)) {
-            PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false, true);
-
-            PDRectangle rectangle = field.getWidgets().get(0).getRectangle();
-
-            //Begin the Content stream
-            contentStream.beginText();
-            contentStream.setNonStrokingColor(textColor);
-            //Setting the font to the Content stream
-            contentStream.setFont(font, fontSize);
-            //Setting the position for the line
-            contentStream.newLineAtOffset(rectangle.getLowerLeftX(), rectangle.getLowerLeftY());
-            //Adding text in the form of string
-            contentStream.showText(text);
-            //Ending the content stream
-            contentStream.endText();
-            //Closing the content stream
-            contentStream.close();
+        if (!field.getFullyQualifiedName().equals(fieldName)) {
+            return;
         }
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false, true);
+
+        PDRectangle rectangle = field.getWidgets().get(0).getRectangle();
+
+        field.setValue(null);
+        field.setReadOnly(true);
+
+        // Begin the Content stream
+        contentStream.beginText();
+        contentStream.setNonStrokingColor(textColor);
+        // Setting the font to the Content stream
+        contentStream.setFont(font, fontSize);
+        // Get text name width
+        float textNameWidth = font.getStringWidth(text) / 1000 * fontSize;
+        // Setting the position for the line
+        contentStream.newLineAtOffset((rectangle.getLowerLeftX() + rectangle.getUpperRightX()) / 2 - textNameWidth / 2, rectangle.getLowerLeftY());
+        // Adding text in the form of string
+        contentStream.showText(text);
+        // Ending the content stream
+        contentStream.endText();
+        // Closing the content stream
+        contentStream.close();
     }
 
     private static List<FileData> getDataSet() {
         Color fullNameColor = new Color(254, 88, 0);
         Color distanceColor = Color.BLACK;
 
-        FieldData user1FullName = new FieldData("fullName", "Lê Bảo Toàn", fullNameColor, "center");
-        FieldData user1Distance = new FieldData("distance", "42km", distanceColor, "left");
-        FieldData user2FullName = new FieldData("fullName", "Lê Bảo Toàn", fullNameColor, "center");
-        FieldData user2Distance = new FieldData("distance", "100km", distanceColor, "left");
+        TextOption user1FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "center");
+        TextOption user1Distance = new TextOption("distance", "42km", distanceColor, "left");
+        TextOption user2FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "center");
+        TextOption user2Distance = new TextOption("distance", "100km", distanceColor, "left");
+        TextOption user3FullName = new TextOption("fullName", "Lê Bảo Toàn", fullNameColor, "left");
+        TextOption user3Distance = new TextOption("distance", "42km", distanceColor, "left");
 
         final FileData user1FileData = new FileData(Arrays.asList(user1FullName, user1Distance));
         final FileData user2FileData = new FileData(Arrays.asList(user2FullName, user2Distance));
+        final FileData user3FileData = new FileData(Arrays.asList(user3FullName, user3Distance));
 
-        return Arrays.asList(user1FileData, user2FileData);
+        return Arrays.asList(user1FileData, user2FileData, user3FileData);
     }
 }

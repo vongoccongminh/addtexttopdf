@@ -2,21 +2,21 @@ package com.minh;
 
 import java.awt.*;
 
-public class FieldData {
-    private String name;
+public class TextOption {
+    private String fieldName;
     private String text;
     private Color textColor;
     private String textAlign;
 
-    public FieldData(String name, String text, Color textColor, String textAlign) {
-        this.name = name;
+    public TextOption(String fieldName, String text, Color textColor, String textAlign) {
+        this.fieldName = fieldName;
         this.text = text;
         this.textColor = textColor;
         this.textAlign = textAlign;
     }
 
-    public String getName() {
-        return name;
+    public String getFieldName() {
+        return fieldName;
     }
 
     public String getText() {

@@ -3,13 +3,13 @@ package com.minh;
 import java.util.List;
 
 public class FileData {
-    List<FieldData> fieldData;
+    List<TextOption> textOptions;
 
-    public FileData(List<FieldData> fieldData) {
-        this.fieldData = fieldData;
+    public FileData(List<TextOption> textOptions) {
+        this.textOptions = textOptions;
     }
 
-    public List<FieldData> getFieldData() {
-        return fieldData;
+    public List<TextOption> getTextOptions() {
+        return textOptions;
     }
 }
